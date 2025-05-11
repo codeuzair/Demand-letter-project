@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from "react-router-dom";  // ✅ Import useNavigate
+import { useNavigate } from "react-router-dom"; 
 import SocialLogin from "./SocialLogin";
 import InputField from "./InputField";
 import './App.css';
 
 const Login = () => {
-  const navigate = useNavigate();  // ✅ Initialize navigate function
+  const navigate = useNavigate(); 
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +26,7 @@ const Login = () => {
       formData.append('client_secret', 'string'); 
       formData.append('scope', '');
 
-      const response = await fetch('http://69.62.111.137:8000/api/v1/login', {
+      const response = await fetch('http://77.37.120.36:8000/api/v1/login', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -43,7 +43,7 @@ const Login = () => {
 
       localStorage.setItem('accessToken', data.access_token);
       
-      // ✅ Correct way to navigate to Home page
+      
       navigate('/home'); 
 
     } catch (error) {

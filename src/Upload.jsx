@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const BASE_URL = "http://77.37.120.36:8000/api/v1"; 
+const BASE_URL = "http://77.37.120.36:8000/api/v1";
 
 const Upload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -11,6 +11,7 @@ const Upload = () => {
   const [templateData, setTemplateData] = useState(null);
   const [renderedFileId, setRenderedFileId] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [isRendering, setIsRendering] = useState(false);
   const [key, setKey] = useState(Date.now());
 
   const handleFileChange = (event) => {
@@ -68,9 +69,7 @@ const Upload = () => {
     setIsFetching(true);
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/status/${fileId}?page=1&page_size=25`
-      );
+      const response = await fetch(`${BASE_URL}/status/${fileId}?page=1&page_size=25`);
       const result = await response.json();
 
       console.log("Fetched status response:", result);
@@ -95,6 +94,9 @@ const Upload = () => {
       return;
     }
 
+    setIsRendering(true);
+    setRenderedFileId(null);
+
     try {
       const response = await fetch(`${BASE_URL}/render_template/`, {
         method: "POST",
@@ -108,14 +110,36 @@ const Upload = () => {
       console.log("Render result:", result);
 
       if (result.file_id) {
-        setRenderedFileId(result.file_id);
-        alert("Demand letter rendered successfully!");
+        const newFileId = result.file_id;
+
+        // Polling until the file is ready
+        const pollInterval = 2000; // 2 seconds
+        const maxRetries = 10;
+        let attempts = 0;
+
+        const pollRenderedFile = async () => {
+          attempts++;
+          const pollResponse = await fetch(`${BASE_URL}/get_rendered_template/${newFileId}`);
+          if (pollResponse.ok) {
+            setRenderedFileId(newFileId);
+            alert("Demand letter rendered successfully!");
+            setIsRendering(false);
+          } else if (attempts < maxRetries) {
+            setTimeout(pollRenderedFile, pollInterval);
+          } else {
+            setIsRendering(false);
+            alert("Rendering timeout. Please try again.");
+          }
+        };
+
+        pollRenderedFile();
       } else {
         throw new Error("Render template did not return file_id");
       }
     } catch (error) {
       console.error("Render error:", error);
       alert("Failed to render demand letter.");
+      setIsRendering(false);
     }
   };
 
@@ -136,9 +160,7 @@ const Upload = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-
       link.setAttribute("download", "demand_letter.docx");
-
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -242,8 +264,9 @@ const Upload = () => {
           {templateData && (
             <button
               onClick={handleExecuteData}
+              disabled={isRendering}
               style={{
-                cursor: "pointer",
+                cursor: isRendering ? "not-allowed" : "pointer",
                 background: "#ffc107",
                 color: "#000",
                 border: "none",
@@ -252,7 +275,7 @@ const Upload = () => {
                 marginRight: "10px",
               }}
             >
-              Execute Data
+              {isRendering ? "Rendering..." : "Execute Data"}
             </button>
           )}
 

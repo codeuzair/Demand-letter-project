@@ -29,7 +29,7 @@ const Register = () => {
     };
 
     try {
-      const response = await fetch("http://69.62.111.137:8000/api/v1/register", {
+      const response = await fetch("http://77.37.120.36:8000/api/v1/register", {
         method: "POST",
         headers: {
           "Accept": "application/json",
@@ -93,34 +93,3 @@ const Register = () => {
 };
 
 export default Register;
-
-
-
-
-
-
-// import InputField from "./InputField";
-
-// const Register = () => {
-//   return (
-//     <div className="auth-page">
-//     <div className="login-container">
-//       <h2 className="form-title">Register New User</h2>
-//       <form action="#" className="login-form">
-//         <InputField type="text" placeholder="Enter Your Name" icon="" />
-//         <InputField type="email" placeholder="Enter Your Email" icon="mail" />
-//         <InputField type="password" placeholder="Enter Your Password" icon="lock" />
-//         <InputField type="password" placeholder="Confirm Password" icon="lock" />
-
-//         <button type="submit" className="login-button">Register</button>
-//       </form>
-
-//       <p className="signup-prompt">
-//         Already have Account? <a href="/" className="signup-link">Login</a>
-//       </p>
-//     </div>
-//     </div>
-//   )
-// }
-
-// export default Register;

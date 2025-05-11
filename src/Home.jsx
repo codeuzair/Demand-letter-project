@@ -7,72 +7,59 @@ import Upload from './Upload';
 function Home() {
   const navigate = useNavigate();
 
-  // State to store uploaded CSV data
   const [csvData, setCsvData] = useState(null);
-  // State to store the generated demand letter
-  const [demandLetter, setDemandLetter] = useState("Your demand letter will appear here...");
+  const [demandLetter, setDemandLetter] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
 
-  // Handle user logout
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     navigate("/");
   };
 
-  // Handle successful file upload
   const handleUploadSuccess = (data) => {
     if (Array.isArray(data) && data.length > 0) {
-      setCsvData(data); // ✅ Extract the first item from the array
-      console.log("CSV Data Uploaded:", data);
+      setCsvData(data);
+      setStep(2);
     } else {
-      console.error("Invalid upload response:", data);
       alert("Upload failed. Please try again.");
     }
   };
 
-
-
-  // Handle demand letter generation
-  const [loading, setLoading] = useState(false); // Add loading state
-
   const handleGenerateLetter = async () => {
-    if (!csvData || csvData.length === 0) {
-      alert("Please upload a CSV file first.");
+    if (!csvData) {
+      alert("Please upload a CSV first.");
       return;
     }
 
-    setLoading(true); // Show loading message
+    setLoading(true);
+    setStep(2);
 
     try {
-      console.log("Sending CSV Data:", csvData);
-
       const response = await fetch("http://69.62.111.137:8000/api/v1/generate/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: csvData }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate demand letter.");
-      }
-
       const result = await response.json();
-      console.log("Received Demand Letter:", result);
+      const text = Array.isArray(result.demand_letter)
+        ? result.demand_letter.join("\n\n")
+        : result.demand_letter;
 
-      if (Array.isArray(result.demand_letter)) {
-        setDemandLetter(result.demand_letter.join("\n\n"));
-      } else {
-        setDemandLetter(result.demand_letter);
-      }
+      // Simulate delay if needed (10s)
+      setTimeout(() => {
+        setDemandLetter(text);
+        setLoading(false);
+        setStep(3);
+      }, 10000);
     } catch (error) {
-      console.error("Error generating demand letter:", error);
-      alert("Error generating demand letter. Please try again.");
-    } finally {
-      setLoading(false); // Hide loading message after response
+      console.error("Generation failed:", error);
+      alert("Failed to generate demand letter.");
+      setLoading(false);
     }
   };
 
-
-  // Handle PDF download
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     doc.text(demandLetter, 10, 10);
@@ -80,30 +67,46 @@ function Home() {
   };
 
   return (
-    <>
-      <div className='App'>
-        <aside className='side-menu'>
-          <div className='dashboard'>
-            <div className='dash-form'>
-              <div className='dash-title'>
-                <h2>Create your Demand Letter</h2>
-                <h4>Upload Your File Here</h4>
-              </div>
-              <div className='upload-file'>
-                <Upload onUploadSuccess={handleUploadSuccess} /> {/* ✅ Pass function */}
-              </div>
-              {/* <div className='dash-submit'>
-                <button onClick={handleGenerateLetter} disabled={loading}>
-                  {loading ? "Generating..." : "Generate Demand Letter"}
-                </button>
-              </div> */}
-            </div>
-          </div>
-        </aside>
-
-        
+    <div className="container">
+      <div className="header">
+        <h1>Demand Letter Generator</h1>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
       </div>
-    </>
+
+      {step === 1 && (
+        <div className="section">
+          <h2>Step 1: Upload CSV</h2>
+          <Upload onUploadSuccess={handleUploadSuccess} />
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="section">
+          <h2>Step 2: Generate Demand Letter</h2>
+          {loading ? (
+            <div className="loader-container">
+              <div className="loader"></div>
+              <p>Please wait while we generate your demand letter...</p>
+            </div>
+          ) : (
+            <button className="button" onClick={handleGenerateLetter}>Generate Letter</button>
+          )}
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="section">
+          <h2>Step 3: Download</h2>
+          <textarea
+            className="output-box"
+            value={demandLetter}
+            rows={15}
+            readOnly
+          />
+          <button className="button" onClick={handleDownloadPDF}>Download as PDF</button>
+        </div>
+      )}
+    </div>
   );
 }
 
