@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+const BASE_URL = "http://77.37.120.36:8000/api/v1"; 
+
 const Upload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -35,7 +37,7 @@ const Upload = () => {
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch("http://69.62.111.137:8000/api/v1/upload", {
+      const response = await fetch(`${BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -67,13 +69,12 @@ const Upload = () => {
 
     try {
       const response = await fetch(
-        `http://69.62.111.137:8000/api/v1/status/${fileId}?page=1&page_size=25`
+        `${BASE_URL}/status/${fileId}?page=1&page_size=25`
       );
       const result = await response.json();
 
       console.log("Fetched status response:", result);
 
-      // Assuming the relevant data is in data.data[0]
       if (result && result.data && result.data.length > 0) {
         setTemplateData(result.data[0]);
         alert("Data fetched successfully!");
@@ -95,7 +96,7 @@ const Upload = () => {
     }
 
     try {
-      const response = await fetch("http://69.62.111.137:8000/api/v1/render_template/", {
+      const response = await fetch(`${BASE_URL}/render_template/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,24 +124,21 @@ const Upload = () => {
       alert("Please execute data first.");
       return;
     }
-  
+
     try {
-      const response = await fetch(
-        `http://69.62.111.137:8000/api/v1/get_rendered_template/${renderedFileId}`
-      );
-  
+      const response = await fetch(`${BASE_URL}/get_rendered_template/${renderedFileId}`);
+
       if (!response.ok) {
         throw new Error("Invalid download.");
       }
-  
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-  
-      // ✅ Save as .docx instead of .pdf
+
       link.setAttribute("download", "demand_letter.docx");
-  
+
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -149,7 +147,6 @@ const Upload = () => {
       alert("Failed to download demand letter. Please ensure the file is rendered.");
     }
   };
-  
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
