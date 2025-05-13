@@ -41,7 +41,7 @@ const Login = () => {
         throw new Error(data.detail || data.description || 'Authentication failed');
       }
 
-      localStorage.setItem('accessToken', data.access_token);
+      localStorage.setItem("accessToken", data.access_token);
       
       
       navigate('/home'); 
@@ -56,10 +56,7 @@ const Login = () => {
   return (
     <div className="auth-page">
       <div className="login-container">
-        <h2 className="form-title">Log in with</h2>
-        <SocialLogin />
-
-        <p className="separator"><span>or</span></p>
+        <h2 className="form-title">Login into DemandLetter</h2>
 
         <form onSubmit={handleSubmit} className="login-form">
           <InputField 

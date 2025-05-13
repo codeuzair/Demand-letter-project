@@ -1,8 +1,8 @@
-import './index.css';
-import { jsPDF } from "jspdf";
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import { jsPDF } from "jspdf";
 import Upload from './Upload';
+import './index.css';
 
 function Home() {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ function Home() {
   const [step, setStep] = useState(1);
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem("accessToken");
     navigate("/");
   };
 
@@ -47,7 +47,6 @@ function Home() {
         ? result.demand_letter.join("\n\n")
         : result.demand_letter;
 
-      // Simulate delay if needed (10s)
       setTimeout(() => {
         setDemandLetter(text);
         setLoading(false);
